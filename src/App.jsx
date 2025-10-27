@@ -282,9 +282,18 @@ export default function App() {
           </div>
 
           <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
-            <div className="text-xs inline-block px-2 py-1 rounded-full bg-slate-100 text-slate-700 mb-2">
-              {questions[current]?.topic}
-            </div>
+            
+
+
+{/* 🔒 Ocultamos el topic durante el examen */}
+      {/* <div className="text-xs inline-block px-2 py-1 rounded-full bg-slate-100 text-slate-700 mb-2">
+        {questions[current]?.topic}
+      </div> */}
+
+
+
+
+
             <h3 className="text-xl font-semibold mb-4 leading-relaxed">{questions[current]?.stem}</h3>
 
             <div className="space-y-3">

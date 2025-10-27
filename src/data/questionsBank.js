@@ -146,16 +146,16 @@ export const QUESTIONS_BANK = [
     "id": "UT-OCULAR-001",
     "topic": "Urgencias y Trauma / Trauma Ocular",
     "stem": "Hombre de 30 años con trauma ocular por metal a alta velocidad. Dolor severo, visión borrosa y herida corneal lineal con cámara anterior plana. ¿Medida inmediata?",
-    "options": [
-      "Irrigar profusamente con suero",
-      "Parche compresivo, antieméticos, antibiótico sistémico y protección rígida; no manipular",
-      "Retirar cuerpo extraño con hisopo",
-      "Tonometría para confirmar"
-    ],
-    "correctIndex": 1,
-    "feedbackCorrect": "En sospecha de herida penetrante/ruptura: protección rígida, nada por vía tópica, antieméticos/analgesia, antibiótico sistémico y valoración urgente.",
-    "feedbackIncorrect": "La irrigación y la presión compresiva están contraindicadas ante posible globo abierto."
-  },
+  "options": [
+    "Parche compresivo y antibiótico tópico",
+    "Protección rígida (escudo) SIN compresión, antieméticos/analgesia, antibiótico sistémico y no manipular",
+    "Ocluir con parche compresivo y citar en 24 h",
+    "Instilar colirio, realizar tonometría y valorar luego"
+  ],
+  "correctIndex": 1,
+  "feedbackCorrect": "En sospecha de herida penetrante/ruptura: protección rígida no compresiva (escudo ocular), antieméticos/analgesia, antibiótico sistémico, NPO y valoración urgente por oftalmología. Nunca comprimir.",
+  "feedbackIncorrect": "El parche compresivo, la tonometría o la instilación de colirios pueden empeorar una lesión penetrante. Debe colocarse escudo rígido SIN compresión y remitir de urgencia."
+},
   {
     "id": "UT-OCULAR-002",
     "topic": "Urgencias y Trauma / Trauma Ocular",
@@ -675,19 +675,19 @@ export const QUESTIONS_BANK = [
     "feedbackIncorrect": "DPP-4/SU no tienen ese beneficio renal probado."
   },
   {
-    "id": "NEPH-LRA-003",
-    "topic": "Nefrología / LRA Urgente",
-    "stem": "Varón 70 años con LRA y sobrecarga hídrica refractaria, hiperkalemia 6.5 con cambios ECG. ¿Indicaciones de diálisis (AEIOU)?",
-    "options": [
-      "Sí, por hiperkalemia refractaria y sobrecarga",
-      "No, esperar 48 h",
-      "Solo diuréticos",
-      "Bicarbonato exclusivamente"
-    ],
-    "correctIndex": 0,
-    "feedbackCorrect": "Hiperkalemia amenazante y sobrecarga refractaria son indicaciones clásicas de terapia de reemplazo renal.",
-    "feedbackIncorrect": "Diferir aumenta riesgo de arritmias/falla respiratoria."
-  },
+  "id": "NEPH-LRA-003",
+  "topic": "Nefrología / LRA Urgente",
+  "stem": "Varón de 70 años con LRA, sobrecarga hídrica refractaria e hiperkalemia de 6.5 mEq/L con alteraciones electrocardiográficas. ¿Presenta indicaciones de terapia de reemplazo renal urgente?",
+  "options": [
+    "Sí, por hiperkalemia refractaria y sobrecarga hídrica refractaria",
+    "No; manejo conservador y reevaluación en 48 h",
+    "Escalar diuréticos exclusivamente",
+    "Bicarbonato intravenoso como única medida"
+  ],
+  "correctIndex": 0,
+  "feedbackCorrect": "Hiperkalemia amenazante y sobrecarga refractaria son indicaciones clásicas de terapia de reemplazo renal.",
+  "feedbackIncorrect": "Diferir aumenta el riesgo de arritmias y deterioro respiratorio; se debe iniciar TRR urgente."
+},
   {
     "id": "NEPH-LRA-004",
     "topic": "Nefrología / Postrenal",
@@ -915,17 +915,17 @@ export const QUESTIONS_BANK = [
   {
     "id": "OB-INF-002",
     "topic": "Obstetricia / Infecciones",
-    "stem": "Pac gestante con sospecha de corioamnionitis (fiebre, leucocitosis, líquido fétido). ¿Cuál es pilar?",
-    "options": [
-      "Antibióticos y finalizar embarazo",
-      "Reposo estricto en cama",
-      "Tocolisis hasta 37 semanas",
-      "Alta ambulatoria"
-    ],
-    "correctIndex": 0,
-    "feedbackCorrect": "Corioamnionitis requiere antibióticos y finalización por riesgo infeccioso.",
-    "feedbackIncorrect": "La tocolisis está contraindicada en infección."
-  },
+    "stem": "Paciente gestante con sospecha de corioamnionitis (fiebre, leucocitosis y líquido amniótico fétido). ¿Cuál es la conducta de manejo principal?",
+  "options": [
+    "Antibióticos y finalizar el embarazo",
+    "Solo antibióticos y vigilancia expectante",
+    "Antipiréticos y control semanal",
+    "Tocolíticos y corticoides para maduración pulmonar"
+  ],
+  "correctIndex": 0,
+  "feedbackCorrect": "La corioamnionitis requiere antibióticos de amplio espectro y finalización del embarazo por riesgo infeccioso materno y fetal.",
+  "feedbackIncorrect": "La conducta no es expectante. La infección intraamniótica obliga al inicio de antibióticos y a finalizar el embarazo tan pronto como sea posible."
+},
   {
     "id": "OB-RPM-002",
     "topic": "Obstetricia / RPM a término",
