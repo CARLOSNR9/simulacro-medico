@@ -14,7 +14,7 @@ import { QUESTIONS_BANK } from "./data/questionsBank"; // ✅ Banco de preguntas
  */
 
 // ===================== CONFIG =====================
-const ACCESS_KEY = "DRJuanjo";
+const ACCESS_KEY = "DRJ25";
 const EXAM_DURATION_MIN = 150; // 2h 30m
 const MAX_QUESTIONS = 80;
 const ENABLE_PERSISTENCE = true;
