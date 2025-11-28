@@ -14,7 +14,7 @@ import { QUESTIONS_BANK } from "./data/questionsBank"; // ✅ Banco de preguntas
  */
 
 // ===================== CONFIG =====================
-const ACCESS_KEY = "DRJ25";
+const ACCESS_KEY = "DRJUAN25";
 const EXAM_DURATION_MIN = 150; // 2h 30m
 const MAX_QUESTIONS = 80;
 const ENABLE_PERSISTENCE = true;
@@ -411,12 +411,18 @@ export default function App() {
               >
                 Volver al menú
               </button>
-              <button
-  disabled
-  className="px-4 py-2 rounded-lg bg-gray-400 text-white font-semibold cursor-not-allowed opacity-60"
->
-  Descargar PDF
-</button>
+             
+             
+
+              <button
+                onClick={exportReportPDF} // <-- CONECTA la función de PDF
+                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold" // <-- Clases para botón ACTIVO
+              >
+                Descargar PDF
+              </button>
+
+
+
             </div>
           </div>
         </main>
