@@ -2,22 +2,15 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import Header from "./Header";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { QUESTIONS_BANK } from "./data/questionsBank"; // ✅ Banco de preguntas externo
-
-/**
- * Simulacro Médico – Versión funcional con PDF
- * -------------------------------------------------
- * Cambios:
- * - Se eliminó el bloque interno de preguntas.
- * - Se importa QUESTIONS_BANK y se usa en startExam().
- * - El resto del flujo (temporizador, persistencia, PDF) se mantiene igual.
- */
+import { QUESTIONS_BANK } from "./data/questionsBank";
 
 // ===================== CONFIG =====================
 const ACCESS_KEY = "DRJUAN25";
 const EXAM_DURATION_MIN = 150; // 2h 30m
 const MAX_QUESTIONS = 80;
 const ENABLE_PERSISTENCE = true;
+const CONTENT_VERSION = "DRJUAN_V25"; // 👈 Cambia esta versión cuando actualices el banco
+// =================================================
 
 // ===================== UTILS =====================
 function shuffleArray(arr) {
@@ -52,13 +45,20 @@ export default function App() {
 
   const resultRef = useRef(null);
 
-  // ===================== PERSISTENCIA =====================
+  // ===================== PERSISTENCIA: LECTURA =====================
   useEffect(() => {
     if (!ENABLE_PERSISTENCE) return;
     try {
       const raw = localStorage.getItem("simulacro_state_v1");
       if (raw) {
         const st = JSON.parse(raw);
+
+        // 🚨 Si la versión NO coincide, borrar progreso
+        if (st.contentVersion !== CONTENT_VERSION) {
+          localStorage.removeItem("simulacro_state_v1");
+          return;
+        }
+
         if (st && st.stage && st.stage !== "login") {
           setStage(st.stage);
           setQuestions(st.questions || []);
@@ -72,9 +72,11 @@ export default function App() {
     } catch {}
   }, []);
 
+  // ===================== PERSISTENCIA: GUARDADO =====================
   useEffect(() => {
     if (!ENABLE_PERSISTENCE) return;
     const payload = {
+      contentVersion: CONTENT_VERSION, // 👈 Guardamos la versión
       stage,
       questions,
       current,
@@ -111,7 +113,6 @@ export default function App() {
 
   // ===================== INICIO DEL EXAMEN =====================
   function startExam() {
-    // ✅ Usa el banco externo barajado y limitado a 80 preguntas
     const pool = shuffleArray(QUESTIONS_BANK);
     const take = Math.min(MAX_QUESTIONS, pool.length);
     const examQs = pool.slice(0, take);
@@ -282,19 +283,9 @@ export default function App() {
           </div>
 
           <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
-            
-
-
-{/* 🔒 Ocultamos el topic durante el examen */}
-      {/* <div className="text-xs inline-block px-2 py-1 rounded-full bg-slate-100 text-slate-700 mb-2">
-        {questions[current]?.topic}
-      </div> */}
-
-
-
-
-
-            <h3 className="text-xl font-semibold mb-4 leading-relaxed">{questions[current]?.stem}</h3>
+            <h3 className="text-xl font-semibold mb-4 leading-relaxed">
+              {questions[current]?.stem}
+            </h3>
 
             <div className="space-y-3">
               {questions[current]?.options.map((opt, idx) => {
@@ -307,7 +298,8 @@ export default function App() {
                       selected ? "border-blue-600 bg-blue-50" : "border-slate-200 hover:border-slate-300"
                     }`}
                   >
-                    <span className="font-semibold mr-2">{String.fromCharCode(65 + idx)}.</span> {opt}
+                    <span className="font-semibold mr-2">{String.fromCharCode(65 + idx)}.</span>{" "}
+                    {opt}
                   </button>
                 );
               })}
@@ -411,18 +403,13 @@ export default function App() {
               >
                 Volver al menú
               </button>
-             
-             
 
-              <button
-                onClick={exportReportPDF} // <-- CONECTA la función de PDF
-                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold" // <-- Clases para botón ACTIVO
-              >
-                Descargar PDF
-              </button>
-
-
-
+              <button
+                onClick={exportReportPDF}
+                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+              >
+                Descargar PDF
+              </button>
             </div>
           </div>
         </main>
