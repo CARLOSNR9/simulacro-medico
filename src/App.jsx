@@ -2,14 +2,34 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import Header from "./Header";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { QUESTIONS_BANK } from "./data/questionsBank";
+
+// 1. IMPORTAMOS AMBOS BANCOS DE PREGUNTAS
+import { QUESTIONS_BANK as BANK_NOV } from "./data/questionsBank"; // El original (Noviembre)
+import { QUESTIONS_26DIC as BANK_DIC } from "./data/questionsBank_26DIC"; // El nuevo (26DIC)
 
 // ===================== CONFIG =====================
-const ACCESS_KEY = "DRJUAN25";
+const ACCESS_KEY = "DRJM25";
 const EXAM_DURATION_MIN = 150; // 2h 30m
 const MAX_QUESTIONS = 80;
 const ENABLE_PERSISTENCE = true;
-const CONTENT_VERSION = "DRJUAN_V25"; // 👈 Cambia esta versión cuando actualices el banco
+const CONTENT_VERSION = "DRJUAN_V25_MULTI"; // Actualizamos versión para limpiar caché viejo
+
+// 2. DEFINIMOS EL CATÁLOGO DE EXÁMENES
+const EXAM_CATALOG = [
+  {
+    id: "noviembre",
+    title: "Simulacro Noviembre",
+    description: "Banco original de preguntas (Casos 1-80)",
+    data: BANK_NOV,
+    disabled: true,
+  },
+  {
+    id: "26dic",
+    title: "Simulacro 26DIC",
+    description: "Nuevos casos clínicos complejos (Actualización Dic)",
+    data: BANK_DIC,
+  },
+];
 // =================================================
 
 // ===================== UTILS =====================
@@ -36,6 +56,10 @@ export default function App() {
   const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState("");
 
+  // Estado para saber qué examen se eligió
+  const [currentExamId, setCurrentExamId] = useState(null);
+  const [examTitle, setExamTitle] = useState("");
+
   const [questions, setQuestions] = useState([]);
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState([]);
@@ -49,16 +73,13 @@ export default function App() {
   useEffect(() => {
     if (!ENABLE_PERSISTENCE) return;
     try {
-      const raw = localStorage.getItem("simulacro_state_v1");
+      const raw = localStorage.getItem("simulacro_state_v2"); // Cambié a v2 para evitar conflictos
       if (raw) {
         const st = JSON.parse(raw);
-
-        // 🚨 Si la versión NO coincide, borrar progreso
         if (st.contentVersion !== CONTENT_VERSION) {
-          localStorage.removeItem("simulacro_state_v1");
+          localStorage.removeItem("simulacro_state_v2");
           return;
         }
-
         if (st && st.stage && st.stage !== "login") {
           setStage(st.stage);
           setQuestions(st.questions || []);
@@ -67,6 +88,11 @@ export default function App() {
           setSecondsLeft(st.secondsLeft ?? EXAM_DURATION_MIN * 60);
           setStartedAt(st.startedAt || null);
           setFinished(st.finished || false);
+
+          // Recuperamos cual examen estaba haciendo
+          setCurrentExamId(st.currentExamId || null);
+          const catalogItem = EXAM_CATALOG.find((e) => e.id === st.currentExamId);
+          if (catalogItem) setExamTitle(catalogItem.title);
         }
       }
     } catch {}
@@ -76,7 +102,7 @@ export default function App() {
   useEffect(() => {
     if (!ENABLE_PERSISTENCE) return;
     const payload = {
-      contentVersion: CONTENT_VERSION, // 👈 Guardamos la versión
+      contentVersion: CONTENT_VERSION,
       stage,
       questions,
       current,
@@ -84,9 +110,10 @@ export default function App() {
       secondsLeft,
       startedAt,
       finished,
+      currentExamId, // Guardamos el ID del examen actual
     };
-    localStorage.setItem("simulacro_state_v1", JSON.stringify(payload));
-  }, [stage, questions, current, answers, secondsLeft, startedAt, finished]);
+    localStorage.setItem("simulacro_state_v2", JSON.stringify(payload));
+  }, [stage, questions, current, answers, secondsLeft, startedAt, finished, currentExamId]);
 
   // ===================== TIMER =====================
   useEffect(() => {
@@ -111,18 +138,29 @@ export default function App() {
     }
   }
 
-  // ===================== INICIO DEL EXAMEN =====================
-  function startExam() {
-    const pool = shuffleArray(QUESTIONS_BANK);
+  // ===================== INICIO DEL EXAMEN (MODIFICADO) =====================
+  function startExam(examId) {
+    // 1. Buscamos el examen seleccionado en el catálogo
+    const selectedExam = EXAM_CATALOG.find((ex) => ex.id === examId);
+    if (!selectedExam) return;
+
+    // 2. Preparamos las preguntas de ESE examen
+    const pool = shuffleArray(selectedExam.data);
     const take = Math.min(MAX_QUESTIONS, pool.length);
     const examQs = pool.slice(0, take);
 
+    // 3. Reseteamos estados
     setQuestions(examQs);
     setAnswers(Array(take).fill(null));
     setCurrent(0);
     setSecondsLeft(EXAM_DURATION_MIN * 60);
     setStartedAt(Date.now());
     setFinished(false);
+
+    // 4. Guardamos la info del examen actual
+    setCurrentExamId(selectedExam.id);
+    setExamTitle(selectedExam.title);
+
     setStage("exam");
   }
 
@@ -152,6 +190,26 @@ export default function App() {
     setStage("result");
   }
 
+  function handleReset() {
+    // Borramos persistencia y volvemos al menú
+    localStorage.removeItem("simulacro_state_v2");
+    setStage("menu");
+    setQuestions([]);
+    setAnswers([]);
+    setCurrentExamId(null);
+  }
+
+  // --- NUEVA FUNCIÓN PARA EL BOTÓN DE SALIDA ---
+  function handleExit() {
+    if (
+      window.confirm(
+        "¿Estás seguro de que quieres salir al menú? Se perderá el progreso actual de este examen."
+      )
+    ) {
+      handleReset(); // Reutilizamos la lógica de resetear
+    }
+  }
+
   // ===================== RESULTADOS =====================
   const result = useMemo(() => {
     if (stage !== "result") return null;
@@ -174,35 +232,31 @@ export default function App() {
     if (!resultRef.current) return;
     const element = resultRef.current;
 
+    // Pequeño hack para asegurar que el PDF capture bien los estilos
     const canvas = await html2canvas(element, {
       scale: 2,
       backgroundColor: "#ffffff",
       useCORS: true,
     });
-
     const imgData = canvas.toDataURL("image/png");
     const pdf = new jsPDF("p", "mm", "a4");
-
     const pageWidth = 210;
     const pageHeight = 297;
     const imgProps = pdf.getImageProperties(imgData);
     const imgWidth = pageWidth;
     const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
-
     let heightLeft = imgHeight;
     let position = 0;
 
     pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
     heightLeft -= pageHeight;
-
     while (heightLeft > 0) {
       position -= pageHeight;
       pdf.addPage();
       pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
     }
-
-    pdf.save("reporte_simulacro.pdf");
+    pdf.save(`reporte_${currentExamId}.pdf`);
   }
 
   // ===================== RENDER =====================
@@ -214,13 +268,14 @@ export default function App() {
         formattedTime={formatTime(secondsLeft)}
         progress={questions.length ? ((current + 1) / questions.length) * 100 : 0}
         stage={stage}
+        onExit={handleExit} // <--- AGREGA ESTA LÍNEA
       />
 
       {/* LOGIN */}
       {stage === "login" && (
         <div className="fixed inset-0 bg-slate-900/40 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-            <h2 className="text-2xl font-bold mb-2">Acceso</h2>
+            <h2 className="text-2xl font-bold mb-2">Acceso DR Juan</h2>
             <p className="text-sm text-slate-600 mb-4">Ingrese la clave para continuar.</p>
             <input
               type="password"
@@ -242,48 +297,65 @@ export default function App() {
         </div>
       )}
 
-      {/* MENU */}
-      {stage === "menu" && (
-        <main className="max-w-5xl mx-auto px-4 py-10">
-          <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 text-center">
-            <h2 className="text-3xl font-bold mb-2">Simulacro Médico de Especialización</h2>
-            <p className="text-slate-600 mb-6">
-              80 casos clínicos exigentes, 2 h 30 min, sin retroalimentación hasta el final.
-            </p>
-            <button
-              onClick={startExam}
-              className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold"
-            >
-              Iniciar Simulacro
-            </button>
-            <div className="mt-6 text-sm text-slate-500">
-              <p>
-                Los casos abarcan: Urgencias, Medicina Interna, Cardiología, Endocrinología,
-                Nefrología/Onco, Obstetricia, Oftalmología, Ortopedia.
-              </p>
-              <p>Progreso guardado localmente (solo en este navegador).</p>
-            </div>
+      {/* MENÚ DE SELECCIÓN (NUEVO DISEÑO) */}
+     
+{stage === "menu" && (
+  <main className="max-w-5xl mx-auto px-4 py-10">
+    <div className="text-center mb-10">
+      <h2 className="text-3xl font-bold text-slate-800">Seleccione un Simulacro</h2>
+      <p className="text-slate-600 mt-2">Elija el examen que desea presentar hoy</p>
+    </div>
+
+    <div className="grid md:grid-cols-2 gap-6">
+      {EXAM_CATALOG.map((exam) => (
+        <div
+          key={exam.id}
+          className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 flex flex-col items-center text-center hover:shadow-md transition-shadow"
+        >
+          <div className="bg-blue-50 text-blue-600 w-16 h-16 rounded-full flex items-center justify-center text-2xl mb-4">
+            📝
           </div>
-        </main>
-      )}
+          <h3 className="text-xl font-bold mb-2">{exam.title}</h3>
+          <p className="text-slate-500 mb-6 flex-grow">{exam.description}</p>
+
+          {/* BOTÓN ACTUALIZADO PARA RESPETAR BLOQUEO */}
+          <button
+            onClick={() => !exam.disabled && startExam(exam.id)}
+            disabled={exam.disabled}
+            className={`w-full px-6 py-3 rounded-xl font-semibold transition-colors shadow-sm ${
+              exam.disabled
+                ? "bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300" // Estilo bloqueado
+                : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200" // Estilo activo
+            }`}
+          >
+            {exam.disabled ? "No disponible" : `Iniciar ${exam.title}`}
+          </button>
+        </div>
+      ))}
+    </div>
+  </main>
+)}
+
+
+
+
+
 
       {/* EXAMEN */}
       {stage === "exam" && (
         <main className="max-w-5xl mx-auto px-4 py-8">
           <div className="flex items-center justify-between mb-4">
+            <div className="text-sm font-semibold text-blue-800 bg-blue-50 px-3 py-1 rounded-lg">
+              {examTitle}
+            </div>
             <div className="text-sm text-slate-600">
               Pregunta {current + 1} de {questions.length}
             </div>
-            <div className="text-sm text-slate-600">
-              Tiempo restante:{" "}
-              <span className={`${secondsLeft <= 600 ? "text-red-600 font-semibold" : ""}`}>
-                {formatTime(secondsLeft)}
-              </span>
-            </div>
           </div>
 
-          <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
-            <h3 className="text-xl font-semibold mb-4 leading-relaxed">
+          <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 relative">
+            {/* stem */}
+            <h3 className="text-xl font-semibold mb-6 leading-relaxed text-slate-800">
               {questions[current]?.stem}
             </h3>
 
@@ -294,31 +366,35 @@ export default function App() {
                   <button
                     key={idx}
                     onClick={() => chooseOption(idx)}
-                    className={`w-full text-left border rounded-xl px-4 py-3 transition ${
-                      selected ? "border-blue-600 bg-blue-50" : "border-slate-200 hover:border-slate-300"
+                    className={`w-full text-left border rounded-xl px-4 py-3 transition-all ${
+                      selected
+                        ? "border-blue-600 bg-blue-50 ring-1 ring-blue-600"
+                        : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                     }`}
                   >
-                    <span className="font-semibold mr-2">{String.fromCharCode(65 + idx)}.</span>{" "}
+                    <span className="font-bold mr-2 text-slate-500">
+                      {String.fromCharCode(65 + idx)}.
+                    </span>{" "}
                     {opt}
                   </button>
                 );
               })}
             </div>
 
-            <div className="flex items-center justify-between mt-6">
+            <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-100">
               <button
                 onClick={prevQuestion}
                 disabled={current === 0}
-                className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 disabled:opacity-50"
+                className="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition"
               >
                 ← Anterior
               </button>
               <button
                 onClick={nextQuestion}
                 disabled={selectedAnswer === null}
-                className="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold disabled:opacity-50"
+                className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition"
               >
-                {current === questions.length - 1 ? "Finalizar" : "Siguiente →"}
+                {current === questions.length - 1 ? "Finalizar Examen" : "Siguiente →"}
               </button>
             </div>
           </div>
@@ -328,36 +404,56 @@ export default function App() {
       {/* RESULTADOS */}
       {stage === "result" && result && (
         <main ref={resultRef} className="max-w-6xl mx-auto px-4 py-10">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold">Resultados: {examTitle}</h2>
+          </div>
+
           <div className="grid md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-white rounded-2xl border p-6">
-              <div className="text-sm text-slate-500">Puntaje</div>
-              <div className="text-4xl font-bold">{result.score}/100</div>
+            <div className="bg-white rounded-2xl border p-6 text-center">
+              <div className="text-sm text-slate-500 uppercase font-bold tracking-wide">
+                Puntaje
+              </div>
+              <div className="text-5xl font-bold mt-2">{result.score}/100</div>
             </div>
-            <div className="bg-white rounded-2xl border p-6">
-              <div className="text-sm text-slate-500">Correctas</div>
-              <div className="text-4xl font-bold text-emerald-600">{result.correct}</div>
+            <div className="bg-white rounded-2xl border p-6 text-center">
+              <div className="text-sm text-slate-500 uppercase font-bold tracking-wide">
+                Correctas
+              </div>
+              <div className="text-5xl font-bold text-emerald-600 mt-2">
+                {result.correct}
+              </div>
             </div>
-            <div className="bg-white rounded-2xl border p-6">
-              <div className="text-sm text-slate-500">Incorrectas</div>
-              <div className="text-4xl font-bold text-rose-600">{result.wrong}</div>
+            <div className="bg-white rounded-2xl border p-6 text-center">
+              <div className="text-sm text-slate-500 uppercase font-bold tracking-wide">
+                Incorrectas
+              </div>
+              <div className="text-5xl font-bold text-rose-600 mt-2">
+                {result.wrong}
+              </div>
             </div>
           </div>
 
+          {/* ... (Resto del componente de resultados igual, con la lógica de byTopic) ... */}
           <div className="bg-white rounded-2xl border p-6 mb-8">
             <h3 className="text-lg font-semibold mb-4">Desempeño por tema</h3>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {Object.entries(result.byTopic).map(([topic, info]) => {
                 const pct = Math.round((info.correct / info.total) * 100);
                 return (
                   <div key={topic}>
                     <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="font-medium">{topic}</span>
-                      <span className="text-slate-600">
+                      <span className="font-medium text-slate-700">{topic}</span>
+                      <span className="text-slate-500">
                         {info.correct}/{info.total} ({pct}%)
                       </span>
                     </div>
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-blue-600" style={{ width: `${pct}%` }} />
+                    <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full ${
+                          pct >= 60 ? "bg-emerald-500" : "bg-amber-500"
+                        }`}
+                        style={{ width: `${pct}%` }}
+                      />
                     </div>
                   </div>
                 );
@@ -366,29 +462,45 @@ export default function App() {
           </div>
 
           <div className="bg-white rounded-2xl border p-6">
-            <h3 className="text-lg font-semibold mb-4">Retroalimentación por pregunta</h3>
-            <ol className="space-y-4 list-decimal pl-5">
+            <h3 className="text-lg font-semibold mb-6">Retroalimentación detallada</h3>
+            <ol className="space-y-6 list-decimal pl-5">
               {questions.map((q, i) => {
                 const chosen = answers[i];
                 const correct = q.correctIndex;
                 const isRight = chosen === correct;
                 return (
-                  <li key={q.id} className="border rounded-xl p-4">
-                    <div className="text-xs inline-block px-2 py-1 rounded-full bg-slate-100 text-slate-700 mb-2">
+                  <li
+                    key={q.id || i}
+                    className="border-b border-slate-100 pb-6 last:border-0 last:pb-0"
+                  >
+                    <div className="text-xs inline-block px-2 py-1 rounded bg-slate-100 text-slate-600 mb-2 font-medium">
                       {q.topic}
                     </div>
-                    <p className="font-medium mb-2">{q.stem}</p>
-                    <div className="text-sm mb-2">
-                      <span className="font-semibold">Tu respuesta:</span>{" "}
-                      {chosen !== null
-                        ? `${String.fromCharCode(65 + chosen)}. ${q.options[chosen]}`
-                        : "(no respondida)"}
+                    <p className="font-medium mb-3 text-lg leading-snug">{q.stem}</p>
+
+                    <div className="grid md:grid-cols-2 gap-4 text-sm">
+                      <div
+                        className={`p-3 rounded-lg ${
+                          isRight
+                            ? "bg-emerald-50 border border-emerald-100"
+                            : "bg-rose-50 border border-rose-100"
+                        }`}
+                      >
+                        <span className="font-bold block mb-1">Tu respuesta:</span>
+                        {chosen !== null ? q.options[chosen] : "(No respondida)"}
+                      </div>
+                      <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
+                        <span className="font-bold block mb-1">Respuesta correcta:</span>
+                        {q.options[correct]}
+                      </div>
                     </div>
-                    <div className="text-sm mb-2">
-                      <span className="font-semibold">Respuesta correcta:</span>{" "}
-                      {String.fromCharCode(65 + correct)}. {q.options[correct]}
-                    </div>
-                    <div className={`text-sm ${isRight ? "text-emerald-700" : "text-rose-700"}`}>
+
+                    <div
+                      className={`mt-3 text-sm p-4 rounded-lg ${
+                        isRight ? "bg-emerald-50 text-emerald-800" : "bg-slate-50 text-slate-700"
+                      }`}
+                    >
+                      <span className="font-bold">📝 Explicación: </span>
                       {isRight ? q.feedbackCorrect : q.feedbackIncorrect}
                     </div>
                   </li>
@@ -396,27 +508,27 @@ export default function App() {
               })}
             </ol>
 
-            <div className="flex gap-3 mt-6">
+            <div className="flex flex-col sm:flex-row gap-4 mt-8 pt-6 border-t">
               <button
-                onClick={() => setStage("menu")}
-                className="px-4 py-2 rounded-lg border border-slate-300"
+                onClick={handleReset}
+                className="px-6 py-3 rounded-xl border border-slate-300 font-medium hover:bg-slate-50 transition"
               >
-                Volver al menú
+                Volver al menú principal
               </button>
 
               <button
                 onClick={exportReportPDF}
-                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg shadow-blue-200 transition"
               >
-                Descargar PDF
+                Descargar Reporte PDF
               </button>
             </div>
           </div>
         </main>
       )}
 
-      <footer className="py-8 text-center text-xs text-slate-500">
-        © {new Date().getFullYear()} Simulacro Médico • v1.0
+      <footer className="py-8 text-center text-xs text-slate-400">
+        © {new Date().getFullYear()} Simulacro Médico DR Juan • v2.0
       </footer>
     </div>
   );
