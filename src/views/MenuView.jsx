@@ -56,13 +56,13 @@ export default function MenuView({ user, exams, onStartExam, onLogout, onGoToDas
                     </div>
 
                 </div>
-                <div className="mt-4 md:mt-0 flex flex-col items-end gap-2">
+                <div className="mt-4 md:mt-0 flex flex-col items-center md:items-end gap-2">
                     <div className="bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium">
                         Plan Premium Activo
                     </div>
                     <button
                         onClick={onGoToDashboard}
-                        className="flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors bg-slate-50 hover:bg-blue-50 px-4 py-2 rounded-full"
+                        className="w-full md:w-auto justify-center flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors bg-slate-50 hover:bg-blue-50 px-4 py-2 rounded-full"
                     >
                         <span>📊</span> Ver Progreso
                     </button>
