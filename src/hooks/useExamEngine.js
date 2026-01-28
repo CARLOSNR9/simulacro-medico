@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { QUESTIONS_BANK as BANK_NOV } from "../data/questionsBank";
 import { QUESTIONS_26DIC as BANK_DIC } from "../data/questionsBank_26DIC";
+import { QUESTIONS_SIMULACRO_2 as BANK_SIM2 } from "../data/questionsSimulacro2";
 import { QUESTIONS_SIMULACRO_1 as BANK_SIM1 } from "../data/questionsSimulacro1";
 
 // ===================== CONFIG =====================
@@ -25,7 +26,7 @@ export const EXAM_CATALOG = [
         title: "Simulacro 2",
         subtitle: "Código Hipócrates",
         description: "Diagnósticos diferenciales y toma de decisiones bajo presión.",
-        data: BANK_DIC, // Placeholder
+        data: BANK_SIM2,
         color: "bg-blue-50 text-blue-600",
         icon: "🧬"
     },
