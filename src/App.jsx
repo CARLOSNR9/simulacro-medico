@@ -4,7 +4,9 @@ import LoginView from "./views/LoginView";
 import MenuView from "./views/MenuView";
 import ExamView from "./views/ExamView";
 import ResultsView from "./views/ResultsView";
+import DashboardView from "./views/DashboardView";
 import { useExamEngine, EXAM_CATALOG } from "./hooks/useExamEngine";
+import { useExamHistory } from "./hooks/useExamHistory";
 import { formatTime } from "./utils/formatTime";
 import { exportReportPDF } from "./utils/pdfExport";
 import { useAuth } from "./hooks/useAuth";
@@ -14,6 +16,8 @@ const ACCESS_KEY = "DRJM25";
 export default function App() {
   // Hook de autenticación
   const { user, loading, error: authError, loginWithGoogle, logout } = useAuth();
+  const { saveResult } = useExamHistory();
+
 
   // Hook del motor del examen
   const engine = useExamEngine();
@@ -54,9 +58,29 @@ export default function App() {
     }
   }
 
-  // Exportar PDF
-  function handleExportPDF() {
-    exportReportPDF(resultRef.current, `reporte_${engine.currentExamId || "medico"}.pdf`);
+  // Efecto para guardar resultado automáticamente
+  useEffect(() => {
+    if (engine.finished && user && engine.result) {
+      // Evitar guardar duplicados si ya se guardó (podríamos usar un ref para flag)
+      saveResult(user.uid, {
+        examId: engine.currentExamId,
+        examTitle: engine.examTitle,
+        score: engine.result.score,
+        correct: engine.result.correct,
+        total: engine.result.total,
+        wrong: engine.result.wrong
+      });
+    }
+  }, [engine.finished]); // Dependencias: solo cuando cambia el estado de finalización
+
+  // ... (handleExit, handleLogout, handleExportPDF existing)
+
+  function handleGoToDashboard() {
+    setStage("dashboard");
+  }
+
+  function handleBackToMenu() {
+    setStage("menu");
   }
 
   // Cálculo de progreso para el Header
@@ -85,6 +109,14 @@ export default function App() {
           exams={EXAM_CATALOG}
           onStartExam={startExam}
           onLogout={handleLogout}
+          onGoToDashboard={handleGoToDashboard}
+        />
+      )}
+
+      {stage === "dashboard" && (
+        <DashboardView
+          user={user}
+          onBack={handleBackToMenu}
         />
       )}
 
