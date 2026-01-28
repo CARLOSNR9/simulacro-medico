@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { QUESTIONS_BANK as BANK_NOV } from "../data/questionsBank";
 import { QUESTIONS_26DIC as BANK_DIC } from "../data/questionsBank_26DIC";
+import { QUESTIONS_SIMULACRO_4 as BANK_SIM4 } from "../data/questionsSimulacro4";
 import { QUESTIONS_SIMULACRO_3 as BANK_SIM3 } from "../data/questionsSimulacro3";
 import { QUESTIONS_SIMULACRO_2 as BANK_SIM2 } from "../data/questionsSimulacro2";
 import { QUESTIONS_SIMULACRO_1 as BANK_SIM1 } from "../data/questionsSimulacro1";
@@ -45,7 +46,7 @@ export const EXAM_CATALOG = [
         title: "Simulacro 4",
         subtitle: "Mente Maestra",
         description: "Casos de alta complejidad para expertos. La prueba final.",
-        data: BANK_DIC, // Placeholder
+        data: BANK_SIM4,
         color: "bg-amber-50 text-amber-600",
         icon: "🧠"
     },
