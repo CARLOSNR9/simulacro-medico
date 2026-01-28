@@ -73,7 +73,10 @@ export default function App() {
     }
   }, [engine.finished]); // Dependencias: solo cuando cambia el estado de finalización
 
-  // ... (handleExit, handleLogout, handleExportPDF existing)
+  // Exportar PDF
+  function handleExportPDF() {
+    exportReportPDF(resultRef.current, `reporte_${engine.currentExamId || "medico"}.pdf`);
+  }
 
   function handleGoToDashboard() {
     setStage("dashboard");
