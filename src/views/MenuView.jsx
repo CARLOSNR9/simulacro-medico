@@ -1,6 +1,6 @@
 import React from "react";
 
-import React from "react";
+
 
 export default function MenuView({ user, exams, onStartExam }) {
     // Extraer nombre del correo (ej: carlosnr99@gmail.com -> Carlosnr99)
@@ -44,8 +44,8 @@ export default function MenuView({ user, exams, onStartExam }) {
                         onClick={() => !exam.disabled && onStartExam(exam.id)}
                         disabled={exam.disabled}
                         className={`group relative overflow-hidden bg-white rounded-2xl p-6 text-left border transition-all duration-300 ${exam.disabled
-                                ? "border-slate-200 opacity-60 cursor-not-allowed"
-                                : "border-slate-200 hover:border-blue-300 hover:shadow-lg hover:-translate-y-1"
+                            ? "border-slate-200 opacity-60 cursor-not-allowed"
+                            : "border-slate-200 hover:border-blue-300 hover:shadow-lg hover:-translate-y-1"
                             }`}
                     >
                         <div className="flex items-start gap-4">
