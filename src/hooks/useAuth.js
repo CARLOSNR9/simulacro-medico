@@ -51,7 +51,18 @@ export function useAuth() {
             await signInWithPopup(auth, provider);
         } catch (err) {
             console.error("Error en login:", err);
-            setError("Error al iniciar sesión con Google.");
+            // Manejo de errores específicos de Firebase
+            if (err.code === 'auth/unauthorized-domain') {
+                setError("Dominio no autorizado. Agrega 'localhost' en Firebase Console > Auth > Settings > Authorized domains.");
+            } else if (err.code === 'auth/popup-closed-by-user') {
+                setError("Inicio de sesión cancelado.");
+            } else if (err.code === 'auth/cancelled-popup-request') {
+                // Ignoramos este error si es por múltiples clicks
+                setLoading(false);
+                return;
+            } else {
+                setError(err.message || "Error al iniciar sesión.");
+            }
             setLoading(false);
         }
     };
