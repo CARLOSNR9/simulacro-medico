@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Header from "./components/Header";
 import LoginView from "./views/LoginView";
 import MenuView from "./views/MenuView";
@@ -7,13 +7,13 @@ import ResultsView from "./views/ResultsView";
 import { useExamEngine, EXAM_CATALOG } from "./hooks/useExamEngine";
 import { formatTime } from "./utils/formatTime";
 import { exportReportPDF } from "./utils/pdfExport";
+import { useAuth } from "./hooks/useAuth";
 
 const ACCESS_KEY = "DRJM25";
 
 export default function App() {
-  // Estado local para Auth (separado del engine del examen)
-  const [password, setPassword] = useState("");
-  const [authError, setAuthError] = useState("");
+  // Hook de autenticación
+  const { user, loading, error: authError, loginWithGoogle, logout } = useAuth();
 
   // Hook del motor del examen
   const engine = useExamEngine();
@@ -25,20 +25,32 @@ export default function App() {
   // Ref para el reporte PDF
   const resultRef = useRef(null);
 
-  // Lógica de Login
-  function handleLogin() {
-    if (password === ACCESS_KEY) {
-      setStage("menu");
-      setAuthError("");
+  // Efecto para sincronizar el stage con el estado de auth
+  useEffect(() => {
+    if (user) {
+      // Si ya estábamos en login, pasamos a menu
+      if (stage === "login") {
+        setStage("menu");
+      }
     } else {
-      setAuthError("Clave incorrecta");
+      // Si no hay usuario, forzamos login
+      setStage("login");
     }
-  }
+  }, [user, stage, setStage]);
 
-  // Lógica de salida
+  // Lógica de salida del examen
   function handleExit() {
     if (window.confirm("¿Estás seguro de que quieres salir al menú? Se perderá el progreso actual de este examen.")) {
       handleReset();
+      setStage("menu"); // Aseguramos volver al menú
+    }
+  }
+
+  // Logout manual
+  function handleLogout() {
+    if (window.confirm("¿Cerrar sesión?")) {
+      handleReset();
+      logout();
     }
   }
 
@@ -59,11 +71,22 @@ export default function App() {
         onExit={handleExit}
       />
 
+      {/* Botón de Logout flotante en el menú */}
+      {stage === "menu" && user && (
+        <div className="absolute top-4 right-4 z-50">
+          <button
+            onClick={handleLogout}
+            className="text-xs text-slate-500 hover:text-red-600 underline"
+          >
+            Cerrar Sesión ({user.email})
+          </button>
+        </div>
+      )}
+
       {stage === "login" && (
         <LoginView
-          password={password}
-          setPassword={setPassword}
-          onLogin={handleLogin}
+          onLogin={loginWithGoogle}
+          loading={loading}
           error={authError}
         />
       )}
