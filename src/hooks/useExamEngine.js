@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { QUESTIONS_BANK as BANK_NOV } from "../data/questionsBank";
 import { QUESTIONS_26DIC as BANK_DIC } from "../data/questionsBank_26DIC";
+import { QUESTIONS_SIMULACRO_1 as BANK_SIM1 } from "../data/questionsSimulacro1";
 
 // ===================== CONFIG =====================
 const EXAM_DURATION_MIN = 150; // 2h 30m
@@ -15,7 +16,7 @@ export const EXAM_CATALOG = [
         title: "Simulacro 1",
         subtitle: "El Despertar Médico",
         description: "Fundamentos clínicos y casos esenciales para iniciar tu preparación.",
-        data: BANK_DIC, // Placeholder
+        data: BANK_SIM1,
         color: "bg-emerald-50 text-emerald-600",
         icon: "🌱"
     },
