@@ -2,7 +2,7 @@ import React from "react";
 
 
 
-export default function MenuView({ user, exams, onStartExam }) {
+export default function MenuView({ user, exams, onStartExam, onLogout }) {
     // Extraer nombre del correo (ej: carlosnr99@gmail.com -> Carlosnr99)
     const getDisplayName = () => {
         if (!user || !user.email) return "Doctor(a)";
@@ -22,9 +22,18 @@ export default function MenuView({ user, exams, onStartExam }) {
                     <p className="text-slate-600">
                         Bienvenido a tu panel de entrenamiento exclusivo.
                     </p>
-                    <p className="text-xs text-slate-400 mt-1">
-                        Cuenta autorizada: {user?.email}
-                    </p>
+                    <div className="flex items-center gap-4 mt-2">
+                        <p className="text-xs text-slate-400">
+                            Cuenta autorizada: {user?.email}
+                        </p>
+                        <button
+                            onClick={onLogout}
+                            className="text-xs text-red-500 hover:text-red-700 font-medium underline"
+                        >
+                            Cerrar Sesión
+                        </button>
+                    </div>
+
                 </div>
                 <div className="mt-4 md:mt-0 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium">
                     Plan Premium Activo
@@ -37,7 +46,7 @@ export default function MenuView({ user, exams, onStartExam }) {
             </div>
 
             {/* Grid de Exámenes */}
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gap-4 md:gap-6">
                 {exams.map((exam) => (
                     <button
                         key={exam.id}
@@ -45,11 +54,11 @@ export default function MenuView({ user, exams, onStartExam }) {
                         disabled={exam.disabled}
                         className={`group relative overflow-hidden bg-white rounded-2xl p-6 text-left border transition-all duration-300 ${exam.disabled
                             ? "border-slate-200 opacity-60 cursor-not-allowed"
-                            : "border-slate-200 hover:border-blue-300 hover:shadow-lg hover:-translate-y-1"
+                            : "border-slate-200 hover:border-blue-300 hover:shadow-lg hover:-translate-y-1 active:scale-[0.98]"
                             }`}
                     >
                         <div className="flex items-start gap-4">
-                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-sm ${exam.color || "bg-slate-100"}`}>
+                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-sm flex-shrink-0 ${exam.color || "bg-slate-100"}`}>
                                 {exam.icon || "📄"}
                             </div>
                             <div>
@@ -66,8 +75,8 @@ export default function MenuView({ user, exams, onStartExam }) {
                         </div>
 
                         {!exam.disabled && (
-                            <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <span className="bg-blue-600 text-white text-xs px-3 py-1 rounded-full font-medium">
+                            <div className="absolute bottom-4 right-4 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                <span className="bg-blue-600 text-white text-xs px-3 py-1 rounded-full font-medium shadow-sm">
                                     Iniciar
                                 </span>
                             </div>

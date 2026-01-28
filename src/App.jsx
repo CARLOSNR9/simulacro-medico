@@ -71,18 +71,6 @@ export default function App() {
         onExit={handleExit}
       />
 
-      {/* Botón de Logout flotante en el menú */}
-      {stage === "menu" && user && (
-        <div className="absolute top-4 right-4 z-50">
-          <button
-            onClick={handleLogout}
-            className="text-xs text-slate-500 hover:text-red-600 underline"
-          >
-            Cerrar Sesión ({user.email})
-          </button>
-        </div>
-      )}
-
       {stage === "login" && (
         <LoginView
           onLogin={loginWithGoogle}
@@ -96,6 +84,7 @@ export default function App() {
           user={user}
           exams={EXAM_CATALOG}
           onStartExam={startExam}
+          onLogout={handleLogout}
         />
       )}
 
