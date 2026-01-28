@@ -3,13 +3,29 @@ import React from "react";
 
 
 export default function MenuView({ user, exams, onStartExam, onLogout }) {
+    // Mapeo de correos a nombres reales
+    const USER_NAMES = {
+        "j2montero.r@gmail.com": "Juan Montero",
+        "carlosnr99@gmail.com": "Carlos",
+        "carlosnr9@gmail.com": "Carlos",
+        "julian.lagosmd@gmail.com": "Julián",
+        "elizabethdbh@gmail.com": "Elizabeth",
+        "gmisnaza17_92@hotmail.com": "Gmisnaza"
+    };
+
     // Extraer nombre del correo (ej: carlosnr99@gmail.com -> Carlosnr99)
     const getDisplayName = () => {
         if (!user) return "Doctor(a)";
 
-        // Si hay nombre real en la cuenta de Google, usarlo
+        // 1. Verificar si hay un nombre personalizado mapeado
+        if (user.email && USER_NAMES[user.email]) {
+            return USER_NAMES[user.email];
+        }
+
+        // 2. Si hay nombre real en la cuenta de Google, usarlo
         if (user.displayName) return user.displayName;
 
+        // 3. Fallback al correo
         if (!user.email) return "Doctor(a)";
         const namePart = user.email.split("@")[0];
         // Capitalizar primera letra

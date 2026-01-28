@@ -4,13 +4,13 @@ import { getAuth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyC-_oGVtAcmlJuuPJ7YRj2Pu4icFdGnsPA",
-    authDomain: "nexus-4dcac.firebaseapp.com",
-    projectId: "nexus-4dcac",
-    storageBucket: "nexus-4dcac.firebasestorage.app",
-    messagingSenderId: "519175724340",
-    appId: "1:519175724340:web:dc56a7592ae9d5054f9961",
-    measurementId: "G-MZNETT5BWD"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
