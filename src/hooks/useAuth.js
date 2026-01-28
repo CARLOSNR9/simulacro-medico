@@ -11,7 +11,10 @@ import {
 export const ALLOWED_EMAILS = [
     "j2montero.r@gmail.com",
     "carlosnr99@gmail.com",
-    "carlosnr9@gmail.com"
+    "carlosnr9@gmail.com",
+    "julian.lagosmd@gmail.com",
+    "elizabethdbh@gmail.com",
+    "gmisnaza17_92@hotmail.com"
 ];
 
 export function useAuth() {

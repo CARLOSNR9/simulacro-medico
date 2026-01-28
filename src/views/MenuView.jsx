@@ -5,7 +5,12 @@ import React from "react";
 export default function MenuView({ user, exams, onStartExam, onLogout }) {
     // Extraer nombre del correo (ej: carlosnr99@gmail.com -> Carlosnr99)
     const getDisplayName = () => {
-        if (!user || !user.email) return "Doctor(a)";
+        if (!user) return "Doctor(a)";
+
+        // Si hay nombre real en la cuenta de Google, usarlo
+        if (user.displayName) return user.displayName;
+
+        if (!user.email) return "Doctor(a)";
         const namePart = user.email.split("@")[0];
         // Capitalizar primera letra
         return namePart.charAt(0).toUpperCase() + namePart.slice(1);
