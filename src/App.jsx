@@ -93,6 +93,7 @@ export default function App() {
 
       {stage === "menu" && (
         <MenuView
+          user={user}
           exams={EXAM_CATALOG}
           onStartExam={startExam}
         />

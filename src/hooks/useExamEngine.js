@@ -11,17 +11,40 @@ const CONTENT_VERSION = "DRJUAN_V25_MULTI";
 // ===================== DATA =====================
 export const EXAM_CATALOG = [
     {
-        id: "noviembre",
-        title: "Simulacro Noviembre",
-        description: "Banco original de preguntas (Casos 1-80)",
-        data: BANK_NOV,
-        disabled: true,
+        id: "simulacro_1",
+        title: "Simulacro 1",
+        subtitle: "El Despertar Médico",
+        description: "Fundamentos clínicos y casos esenciales para iniciar tu preparación.",
+        data: BANK_DIC, // Placeholder
+        color: "bg-emerald-50 text-emerald-600",
+        icon: "🌱"
     },
     {
-        id: "26dic",
-        title: "Simulacro 26DIC",
-        description: "Nuevos casos clínicos complejos (Actualización Dic)",
-        data: BANK_DIC,
+        id: "simulacro_2",
+        title: "Simulacro 2",
+        subtitle: "Código Hipócrates",
+        description: "Diagnósticos diferenciales y toma de decisiones bajo presión.",
+        data: BANK_DIC, // Placeholder
+        color: "bg-blue-50 text-blue-600",
+        icon: "🧬"
+    },
+    {
+        id: "simulacro_3",
+        title: "Simulacro 3",
+        subtitle: "Desafío de Guardia",
+        description: "Manejo de urgencias, pacientes críticos y situaciones complejas.",
+        data: BANK_DIC, // Placeholder
+        color: "bg-purple-50 text-purple-600",
+        icon: "🏥"
+    },
+    {
+        id: "simulacro_4",
+        title: "Simulacro 4",
+        subtitle: "Mente Maestra",
+        description: "Casos de alta complejidad para expertos. La prueba final.",
+        data: BANK_DIC, // Placeholder
+        color: "bg-amber-50 text-amber-600",
+        icon: "🧠"
     },
 ];
 
