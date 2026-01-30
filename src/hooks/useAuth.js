@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { auth } from "../firebase/config";
+import { auth, db } from "../firebase/config";
 import {
     signInWithPopup,
     GoogleAuthProvider,
     signOut,
     onAuthStateChanged
 } from "firebase/auth";
+import { collection, addDoc, updateDoc, doc, serverTimestamp } from "firebase/firestore";
 
 // Lista de correos permitidos
 export const ALLOWED_EMAILS = [
@@ -21,16 +22,39 @@ export function useAuth() {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [sessionId, setSessionId] = useState(null);
 
     // Efecto para vigilar el estado de autenticación
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setLoading(false);
             if (currentUser) {
                 // Verificar si el correo está en la lista blanca
                 if (ALLOWED_EMAILS.includes(currentUser.email)) {
                     setUser(currentUser);
                     setError(null);
+
+                    // Iniciar sesión (trackeo)
+                    if (!sessionId) {
+                        try {
+                            const ipData = await fetch('https://ipapi.co/json/').then(res => res.json()).catch(() => ({}));
+                            const sessionRef = await addDoc(collection(db, "sessions"), {
+                                userId: currentUser.uid,
+                                userEmail: currentUser.email,
+                                loginTime: serverTimestamp(),
+                                userAgent: navigator.userAgent,
+                                ip: ipData.ip || 'Unknown',
+                                city: ipData.city || 'Unknown',
+                                region: ipData.region || 'Unknown',
+                                country: ipData.country_name || 'Unknown',
+                                deviceType: /Mobile|Android|iP(ad|hone)/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop'
+                            });
+                            setSessionId(sessionRef.id);
+                        } catch (e) {
+                            console.error("Error tracking session:", e);
+                        }
+                    }
+
                 } else {
                     // Si no está autorizado, cerramos la sesión y mostramos error
                     signOut(auth);
@@ -39,6 +63,7 @@ export function useAuth() {
                 }
             } else {
                 setUser(null);
+                setSessionId(null);
             }
         });
 
@@ -71,8 +96,20 @@ export function useAuth() {
     };
 
     // Función para cerrar sesión
-    const logout = () => {
-        signOut(auth).catch(err => console.error(err));
+    const logout = async () => {
+        try {
+            if (sessionId) {
+                const sessionRef = doc(db, "sessions", sessionId);
+                await updateDoc(sessionRef, {
+                    logoutTime: serverTimestamp(),
+                    duration: serverTimestamp() // Placeholder, timestamp difference handled on read or via cloud function
+                });
+            }
+            await signOut(auth);
+            setSessionId(null);
+        } catch (err) {
+            console.error("Error al cerrar sesión:", err);
+        }
     };
 
     return {

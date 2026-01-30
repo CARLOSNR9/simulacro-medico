@@ -2,7 +2,7 @@ import React from "react";
 
 
 
-export default function MenuView({ user, exams, onStartExam, onLogout, onGoToDashboard }) {
+export default function MenuView({ user, exams, onStartExam, onLogout, onGoToDashboard, onGoToAdmin }) {
     // Mapeo de correos a nombres reales
     const USER_NAMES = {
         "j2montero.r@gmail.com": "Juan Montero",
@@ -60,12 +60,22 @@ export default function MenuView({ user, exams, onStartExam, onLogout, onGoToDas
                     <div className="bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium">
                         Plan Premium Activo
                     </div>
-                    <button
-                        onClick={onGoToDashboard}
-                        className="w-full md:w-auto justify-center flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors bg-slate-50 hover:bg-blue-50 px-4 py-2 rounded-full"
-                    >
-                        <span>📊</span> Ver Progreso
-                    </button>
+                    <div className="flex gap-2">
+                        {user && ["carlosnr9@gmail.com", "carlosnr99@gmail.com"].includes(user.email) && (
+                            <button
+                                onClick={onGoToAdmin}
+                                className="w-full md:w-auto justify-center flex items-center gap-2 text-sm font-semibold text-white hover:text-white transition-colors bg-slate-800 hover:bg-slate-900 px-4 py-2 rounded-full shadow-md"
+                            >
+                                <span>🛡️</span> Admin
+                            </button>
+                        )}
+                        <button
+                            onClick={onGoToDashboard}
+                            className="w-full md:w-auto justify-center flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors bg-slate-50 hover:bg-blue-50 px-4 py-2 rounded-full"
+                        >
+                            <span>📊</span> Ver Progreso
+                        </button>
+                    </div>
                 </div>
             </div>
 

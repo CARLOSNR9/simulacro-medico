@@ -68,7 +68,9 @@ export default function App() {
         score: engine.result.score,
         correct: engine.result.correct,
         total: engine.result.total,
-        wrong: engine.result.wrong
+        wrong: engine.result.wrong,
+        userEmail: user.email,
+        userName: user.displayName || user.email.split('@')[0]
       });
     }
   }, [engine.finished]); // Dependencias: solo cuando cambia el estado de finalización
@@ -80,6 +82,10 @@ export default function App() {
 
   function handleGoToDashboard() {
     setStage("dashboard");
+  }
+
+  function handleGoToAdmin() {
+    setStage("admin-dashboard");
   }
 
   function handleBackToMenu() {
@@ -113,6 +119,7 @@ export default function App() {
           onStartExam={startExam}
           onLogout={handleLogout}
           onGoToDashboard={handleGoToDashboard}
+          onGoToAdmin={handleGoToAdmin}
         />
       )}
 
@@ -121,6 +128,16 @@ export default function App() {
           user={user}
           onBack={handleBackToMenu}
         />
+      )}
+
+      {stage === "admin-dashboard" && (
+        <React.Suspense fallback={<div>Cargando...</div>}>
+          {/* Dynamic import to avoid circular dependencies or load only when needed */}
+          {(() => {
+            const AdminDashboardView = React.lazy(() => import("./views/AdminDashboardView"));
+            return <AdminDashboardView user={user} onBack={handleBackToMenu} />;
+          })()}
+        </React.Suspense>
       )}
 
       {stage === "exam" && (
