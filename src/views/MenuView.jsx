@@ -61,7 +61,7 @@ export default function MenuView({ user, exams, onStartExam, onLogout, onGoToDas
                         Plan Premium Activo
                     </div>
                     <div className="flex gap-2">
-                        {user && ["carlosnr9@gmail.com", "carlosnr99@gmail.com"].includes(user.email) && (
+                        {user && ["carlosnr9@gmail.com"].includes(user.email) && (
                             <button
                                 onClick={onGoToAdmin}
                                 className="w-full md:w-auto justify-center flex items-center gap-2 text-sm font-semibold text-white hover:text-white transition-colors bg-slate-800 hover:bg-slate-900 px-4 py-2 rounded-full shadow-md"
