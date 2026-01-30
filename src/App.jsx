@@ -58,10 +58,14 @@ export default function App() {
     }
   }
 
+  // Ref para evitar guardar duplicados
+  const saveGuard = useRef(false);
+
   // Efecto para guardar resultado automáticamente
   useEffect(() => {
-    if (engine.finished && user && engine.result) {
-      // Evitar guardar duplicados si ya se guardó (podríamos usar un ref para flag)
+    if (engine.finished && user && engine.result && !saveGuard.current) {
+      saveGuard.current = true; // Marcar como guardado
+
       saveResult(user.uid, {
         examId: engine.currentExamId,
         examTitle: engine.examTitle,
@@ -73,7 +77,12 @@ export default function App() {
         userName: user.displayName || user.email.split('@')[0]
       });
     }
-  }, [engine.finished]); // Dependencias: solo cuando cambia el estado de finalización
+
+    // Resetear el guard cuando se reinicia el examen
+    if (!engine.finished) {
+      saveGuard.current = false;
+    }
+  }, [engine.finished, user, engine.result]); // Dependencias: solo cuando cambia el estado de finalización
 
   // Exportar PDF
   function handleExportPDF() {

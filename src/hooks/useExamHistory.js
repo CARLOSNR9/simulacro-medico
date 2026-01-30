@@ -33,15 +33,18 @@ export function useExamHistory() {
         try {
             const q = query(
                 collection(db, "exam_results"),
-                where("userId", "==", userId),
-                orderBy("timestamp", "desc")
+                where("userId", "==", userId)
             );
             const querySnapshot = await getDocs(q);
             const data = querySnapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data(),
-                date: doc.data().timestamp.toDate() // Convertir Timestamp a Date
+                date: doc.data().timestamp?.toDate() || new Date() // Convertir Timestamp a Date
             }));
+
+            // Ordenar en cliente para evitar necesidad de índice compuesto en Firestore
+            data.sort((a, b) => b.date - a.date);
+
             setHistory(data);
         } catch (err) {
             console.error("Error obteniendo historial:", err);
