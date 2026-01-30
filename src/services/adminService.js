@@ -38,13 +38,17 @@ export const AdminService = {
 
             // 3. Calcular usuarios únicos
             const uniqueUsersMap = new Map();
+            const userIdToEmail = new Map(); // Mapa auxiliar para relacionar ID con Email
 
             // Procesar desde sesiones
             sessions.forEach(s => {
                 if (s.userEmail) {
+                    userIdToEmail.set(s.userId, s.userEmail); // Guardar relación
+
                     if (!uniqueUsersMap.has(s.userEmail)) {
                         uniqueUsersMap.set(s.userEmail, {
                             email: s.userEmail,
+                            userId: s.userId,
                             lastLogin: s.loginDate,
                             locations: new Set([s.city]),
                             devices: new Set([s.deviceType]),
@@ -62,10 +66,14 @@ export const AdminService = {
 
             // Procesar desde resultados para completar datos
             results.forEach(r => {
-                if (r.userEmail) {
-                    if (!uniqueUsersMap.has(r.userEmail)) {
-                        uniqueUsersMap.set(r.userEmail, {
-                            email: r.userEmail,
+                // Intentar obtener email del resultado o buscarlo por userId en el mapa de sesiones
+                const email = r.userEmail || userIdToEmail.get(r.userId);
+
+                if (email) {
+                    if (!uniqueUsersMap.has(email)) {
+                        uniqueUsersMap.set(email, {
+                            email: email,
+                            userId: r.userId,
                             lastLogin: r.date,
                             locations: new Set(),
                             devices: new Set(),
@@ -73,7 +81,7 @@ export const AdminService = {
                             avgScore: 0
                         });
                     }
-                    const user = uniqueUsersMap.get(r.userEmail);
+                    const user = uniqueUsersMap.get(email);
                     user.attempts += 1;
                     // Suma para promedio (se ajustará al final)
                     user.totalScore = (user.totalScore || 0) + r.score;
