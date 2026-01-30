@@ -5,9 +5,10 @@ export const AdminService = {
     // Obtener estadísticas generales
     async getDashboardStats() {
         try {
-            // 1. Obtener sesiones recientes (últimas 200 para no saturar)
+            // 1. Obtener sesiones recientes
             const sessionsRef = collection(db, "sessions");
-            const sessionsQuery = query(sessionsRef, orderBy("loginTime", "desc"), limit(200));
+            // Quitamos el orderBy para evitar errores de índice. Ordenamos en cliente.
+            const sessionsQuery = query(sessionsRef, limit(200));
             const sessionsSnapshot = await getDocs(sessionsQuery);
             const sessions = sessionsSnapshot.docs.map(doc => {
                 const data = doc.data();
@@ -17,11 +18,12 @@ export const AdminService = {
                     loginDate: data.loginTime?.toDate ? data.loginTime.toDate() : new Date(),
                     logoutDate: data.logoutTime?.toDate ? data.logoutTime.toDate() : null
                 };
-            });
+            }).sort((a, b) => b.loginDate - a.loginDate); // Ordenado en cliente
 
             // 2. Obtener resultados de exámenes
             const resultsRef = collection(db, "exam_results");
-            const resultsQuery = query(resultsRef, orderBy("timestamp", "desc"), limit(500));
+            // Quitamos el orderBy.
+            const resultsQuery = query(resultsRef, limit(500));
             const resultsSnapshot = await getDocs(resultsQuery);
             const results = resultsSnapshot.docs.map(doc => {
                 const data = doc.data();
@@ -30,7 +32,9 @@ export const AdminService = {
                     ...data,
                     date: data.timestamp?.toDate ? data.timestamp.toDate() : new Date()
                 };
-            });
+            }).sort((a, b) => b.date - a.date); // Ordenado en cliente
+
+            console.log("Admin Dashboard Data Loaded:", { sessions: sessions.length, results: results.length });
 
             // 3. Calcular usuarios únicos
             const uniqueUsersMap = new Map();
