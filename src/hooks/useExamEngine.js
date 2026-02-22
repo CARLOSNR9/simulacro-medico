@@ -6,6 +6,7 @@ import { QUESTIONS_SIMULACRO_3 as BANK_SIM3 } from "../data/questionsSimulacro3"
 import { QUESTIONS_SIMULACRO_2 as BANK_SIM2 } from "../data/questionsSimulacro2";
 import { QUESTIONS_SIMULACRO_1 as BANK_SIM1 } from "../data/questionsSimulacro1";
 import { QUESTIONS_SIMULACRO_5 as BANK_SIM5 } from "../data/questionsSimulacro5";
+import { QUESTIONS_SIMULACRO_6 as BANK_SIM6 } from "../data/questionsSimulacro6";
 
 
 // ===================== CONFIG =====================
@@ -60,6 +61,15 @@ export const EXAM_CATALOG = [
         data: BANK_SIM5,
         color: "bg-rose-50 text-rose-600",
         icon: "🔥"
+    },
+    {
+        id: "simulacro_6",
+        title: "Simulacro 6",
+        subtitle: "Epidemiología",
+        description: "Banco de 80 preguntas enfocadas en Epidemiología.",
+        data: BANK_SIM6,
+        color: "bg-indigo-50 text-indigo-600",
+        icon: "📊"
     },
 ];
 
