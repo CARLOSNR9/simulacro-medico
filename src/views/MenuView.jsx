@@ -87,40 +87,49 @@ export default function MenuView({ user, exams, onStartExam, onLogout, onGoToDas
             {/* Grid de Exámenes */}
             <div className="grid md:grid-cols-2 gap-4 md:gap-6">
                 {exams.map((exam) => (
-                    <button
-                        key={exam.id}
-                        onClick={() => !exam.disabled && onStartExam(exam.id)}
-                        disabled={exam.disabled}
-                        className={`group relative overflow-hidden bg-white rounded-2xl p-6 text-left border transition-all duration-300 ${exam.disabled
-                            ? "border-slate-200 opacity-60 cursor-not-allowed"
-                            : "border-slate-200 hover:border-blue-300 hover:shadow-lg hover:-translate-y-1 active:scale-[0.98]"
-                            }`}
-                    >
-                        <div className="flex items-start gap-4">
-                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-sm flex-shrink-0 ${exam.color || "bg-slate-100"}`}>
-                                {exam.icon || "📄"}
-                            </div>
-                            <div>
-                                <h4 className="text-lg font-bold text-slate-800 group-hover:text-blue-700 transition-colors">
-                                    {exam.title}
-                                </h4>
-                                <p className="text-sm font-semibold text-slate-600 mb-1">
-                                    {exam.subtitle}
-                                </p>
-                                <p className="text-xs text-slate-500 leading-relaxed max-w-xs">
-                                    {exam.description}
-                                </p>
-                            </div>
-                        </div>
-
-                        {!exam.disabled && (
-                            <div className="absolute bottom-4 right-4 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                                <span className="bg-blue-600 text-white text-xs px-3 py-1 rounded-full font-medium shadow-sm">
-                                    Iniciar
+                    <React.Fragment key={exam.id}>
+                        {exam.id === 'simulacro_5' && (
+                            <div className="col-span-1 md:col-span-2 mt-4 pt-8 border-t-2 border-slate-200 text-center">
+                                <span className="inline-block bg-rose-100 text-rose-700 text-xs font-bold px-3 py-1 rounded-full mb-2 uppercase tracking-wider">
+                                    Nuevos Simulacros
                                 </span>
+                                <h3 className="text-xl font-bold text-slate-800">Sección Avanzada</h3>
                             </div>
                         )}
-                    </button>
+                        <button
+                            onClick={() => !exam.disabled && onStartExam(exam.id)}
+                            disabled={exam.disabled}
+                            className={`group relative overflow-hidden bg-white rounded-2xl p-6 text-left border transition-all duration-300 ${exam.disabled
+                                ? "border-slate-200 opacity-60 cursor-not-allowed"
+                                : "border-slate-200 hover:border-blue-300 hover:shadow-lg hover:-translate-y-1 active:scale-[0.98]"
+                                }`}
+                        >
+                            <div className="flex items-start gap-4">
+                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-sm flex-shrink-0 ${exam.color || "bg-slate-100"}`}>
+                                    {exam.icon || "📄"}
+                                </div>
+                                <div>
+                                    <h4 className="text-lg font-bold text-slate-800 group-hover:text-blue-700 transition-colors">
+                                        {exam.title}
+                                    </h4>
+                                    <p className="text-sm font-semibold text-slate-600 mb-1">
+                                        {exam.subtitle}
+                                    </p>
+                                    <p className="text-xs text-slate-500 leading-relaxed max-w-xs">
+                                        {exam.description}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {!exam.disabled && (
+                                <div className="absolute bottom-4 right-4 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                    <span className="bg-blue-600 text-white text-xs px-3 py-1 rounded-full font-medium shadow-sm">
+                                        Iniciar
+                                    </span>
+                                </div>
+                            )}
+                        </button>
+                    </React.Fragment>
                 ))}
             </div>
         </main>

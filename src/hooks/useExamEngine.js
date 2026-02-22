@@ -5,6 +5,8 @@ import { QUESTIONS_SIMULACRO_4 as BANK_SIM4 } from "../data/questionsSimulacro4"
 import { QUESTIONS_SIMULACRO_3 as BANK_SIM3 } from "../data/questionsSimulacro3";
 import { QUESTIONS_SIMULACRO_2 as BANK_SIM2 } from "../data/questionsSimulacro2";
 import { QUESTIONS_SIMULACRO_1 as BANK_SIM1 } from "../data/questionsSimulacro1";
+import { QUESTIONS_SIMULACRO_5 as BANK_SIM5 } from "../data/questionsSimulacro5";
+
 
 // ===================== CONFIG =====================
 const EXAM_DURATION_MIN = 150; // 2h 30m
@@ -49,6 +51,15 @@ export const EXAM_CATALOG = [
         data: BANK_SIM4,
         color: "bg-amber-50 text-amber-600",
         icon: "🧠"
+    },
+    {
+        id: "simulacro_5",
+        title: "Simulacro 5",
+        subtitle: "Nuevo Desafío",
+        description: "Nueva batería de preguntas integradas de alta complejidad.",
+        data: BANK_SIM5,
+        color: "bg-rose-50 text-rose-600",
+        icon: "🔥"
     },
 ];
 
